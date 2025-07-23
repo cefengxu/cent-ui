@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【用户管理系统】- HACKER DASHBOARD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="terminal-header">
+            <div class="header-line">
+                <span class="prompt">root@hackersys:~# </span>
+                <span class="typing">./user_manager.sh --status=online</span>
+            </div>
+            <h1 class="title">
+                <i class="fas fa-terminal"></i>
+                Cent Apps Platform UI v0.1.0
+            </h1>
+        </header>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <div class="filter-section">
+                <label for="appFilter">
+                    <i class="fas fa-filter"></i> APP_ID 过滤器:
+                </label>
+                <select id="appFilter" class="terminal-select">
+                    <option value="">全部应用</option>
+                </select>
+                <button id="refreshBtn" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> 刷新数据
+                </button>
+            </div>
+        </div>
+
+        <!-- 用户统计 -->
+        <div class="stats-panel">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-info">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">总用户数</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-key"></i>
+                <div class="stat-info">
+                    <div class="stat-number" id="totalKeys">0</div>
+                    <div class="stat-label">API密钥总数</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <div class="stat-info">
+                    <div class="stat-number" id="activeKeys">0</div>
+                    <div class="stat-label">活跃密钥</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="users-container">
+            <div class="section-header">
+                <h2>
+                    <i class="fas fa-database"></i>
+                    用户数据库
+                </h2>
+            </div>
+            <div id="usersList" class="users-list">
+                <!-- 用户数据将在这里动态加载 -->
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loading" class="loading hidden">
+            <div class="loader"></div>
+            <span>正在加载数据...</span>
+        </div>
+    </div>
+
+    <!-- 创建API密钥模态框 -->
+    <div id="createKeyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> 创建新API密钥</h3>
+                <button class="close-btn" onclick="closeCreateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="createKeyForm">
+                <div class="form-group">
+                    <label>用户邮箱:</label>
+                    <input type="email" id="createEmail" required readonly>
+                </div>
+                <div class="form-group">
+                    <label>应用ID:</label>
+                    <input type="text" id="createAppId" required readonly>
+                </div>
+                <div class="form-group">
+                    <label>计划:</label>
+                    <select id="createPlan">
+                        <option value="free">免费版</option>
+                        <option value="pro">专业版</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>有效期(天):</label>
+                    <input type="number" id="createExpireDays" value="30" min="1" max="365">
+                </div>
+                <div class="form-group">
+                    <label>使用限制:</label>
+                    <input type="number" id="createUsageLimit" value="100" min="1">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-key"></i> 创建密钥
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <!-- 删除用户模态框 -->
+    <div id="deleteUserModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-alt"></i> 删除用户</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="delete-warning">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="warning-text">
+                    <p><strong>警告：此操作不可撤销！</strong></p>
+                    <p>您即将删除用户及其所有相关数据，包括API密钥。</p>
+                </div>
+            </div>
+            <form id="deleteUserForm">
+                <div class="form-group">
+                    <label>用户邮箱:</label>
+                    <input type="email" id="deleteEmail" required readonly>
+                </div>
+                <div class="form-group">
+                    <label>应用ID:</label>
+                    <input type="text" id="deleteAppId" required readonly>
+                </div>
+                <div class="form-group">
+                    <label>管理员邮箱:</label>
+                    <input type="email" id="adminEmail" value="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>管理员应用ID:</label>
+                    <input type="text" id="adminAppId" value="app-admin" required>
+                </div>
+                <div class="form-group">
+                    <label>确认删除 (请输入 "CONFIRM_DELETE"):</label>
+                    <input type="text" id="deleteConfirmation" placeholder="CONFIRM_DELETE" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> 确认删除用户
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html> 

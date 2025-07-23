@@ -1,0 +1,25 @@
+# Flask应用配置文件
+
+# API配置
+api:
+  ip: "10.176.14.88"
+  port: 1605
+  route: "/api/v1"
+  request_timeout: 30  # 秒
+
+# Flask应用配置
+flask:
+  debug: true
+  host: "0.0.0.0"
+  port: 2622
+
+# CORS配置
+cors:
+  origins: "*"  # 允许跨域的来源
+
+# 默认配置
+defaults:
+  plan: "free"
+  expires_in_days: 30
+  usage_limit: 100
+  confirmation: "CONFIRM_DELETE"
