@@ -1,0 +1,15 @@
+
+version: '3.8'
+
+services:
+  centui:
+    image: ims-centui:latest
+    container_name: cenTui
+    ports:
+      - "2622:2622"
+    volumes:
+      - /home/ubuntu/svs2/cent-ui:/cent-ui
+    working_dir: /cent-ui
+    command: bash -c "source /venv/bin/activate && python app.py"
+    tty: true
+
