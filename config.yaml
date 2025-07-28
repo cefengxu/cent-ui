@@ -2,8 +2,8 @@
 
 # API配置
 api:
-  # ip: "10.176.14.88"
-  ip: "cenTsvs"
+  ip: "10.176.14.88"
+  # ip: "cenTsvs"
   port: 1605
   route: "/api/v1"
   request_timeout: 30  # 秒
